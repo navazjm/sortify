@@ -1,6 +1,6 @@
 # Sortify
 
-> 🚧 WIP: Currently tested only on ARM macOS.
+> ⚠️ Note: Sortify is still in early stages and has only been tested on ARM based MacOS. 
 
 ## Table of Contents
 - [Quick Start](#quick-start)
@@ -18,10 +18,12 @@ _More detailed usage steps will be added as development progresses._
 
 ## Overview
 
-Sortify is a simple, lightweight C application that visualizes popular sorting
-algorithms in real time. Built using [alfredbaudisch/raylib-cimgui](https://github.com/alfredbaudisch/raylib-cimgui),
-the program provides an interactive way to explore, learn, and understand the
-inner workings of classic sorting techniques.
+Sortify is a simple, lightweight **C application** that visualizes popular sorting
+algorithms in real time. Built with **[Raylib](https://github.com/raysan5/raylib)** and
+**[cimgui](https://github.com/cimgui/cimgui)** via
+**[raylib-cimgui](https://github.com/alfredbaudisch/raylib-cimgui)** integration, it offers
+an interactive way to explore, learn, and understand the inner workings of classic
+sorting techniques.
 
 Whether you're a student, educator, or just a curious developer, this visualizer
 makes it easy to see how data moves and transforms during each step of a sorting process.
@@ -35,6 +37,18 @@ makes it easy to see how data moves and transforms during each step of a sorting
 - Quick Sort
 
 ## Install
+
+### Dependencies
+
+Sortify relies on the following libraries:
+
+- **[Raylib](https://github.com/raysan5/raylib)** – A simple and easy-to-use C library for graphics, audio, and input.
+- **[cimgui](https://github.com/cimgui/cimgui)** – C bindings for Dear ImGui.
+- **[raylib-cimgui](https://github.com/alfredbaudisch/raylib-cimgui)** – A bridge between Raylib and Dear ImGui.
+
+> 🗂️ All dependencies are located in the `libs` folder.  
+> **Raylib** is included as a Git submodule at version **5.5.0** (`c1ab645`).  
+> **cimgui** and **raylib-cimgui** have been integrated and customized to ensure compatibility with this version of Raylib.
 
 ### Install From Source
 
