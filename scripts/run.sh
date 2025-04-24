@@ -3,22 +3,21 @@
 ## Copyright (c) 2025 Michael Navarro 
 ## MIT license, see LICENSE for more details.
 
-rm -rf build/debug
+EXECUTABLE=./build/debug/sortify_d
 
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -S . -B build/debug
-make -C build/debug
+if [ "$1" == "--build" ]; then
+    if ! ./scripts/build.sh; then
+        echo "Debug - Build failed!"
+        exit 1
+    fi
 
-# Needed for neovim clangd lsp
-# Remove existing symlink if it exists
-[ -L compile_commands.json ] && rm compile_commands.json
-# Create symlink for neovim lspconfig clangd
-ln -s build/debug/compile_commands.json compile_commands.json
-
-if [ $? -eq 0 ]; then
     echo "Debug - Build succeeded!"
-    ./build/debug/sortify_d "$@"
-else
-    echo "Debug - Build failed!"
-    exit 1
+    shift # Remove the --build arg so it doesn't get passed to the executable
 fi
 
+if [ -f "$EXECUTABLE" ]; then
+    "$EXECUTABLE" "$@"
+else
+    echo "Executable not found at $EXECUTABLE. Try running with --build to compile it first."
+    exit 1
+fi
