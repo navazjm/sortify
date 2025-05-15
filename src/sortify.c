@@ -1,57 +1,15 @@
+#include "config.h"
+#include "file.h"
 #include "imgui_impl_raylib.h"
 #include "rlcimgui.h"
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-
-char *get_config_path()
-{
-    const char *home = getenv("HOME");
-    if (!home)
-        return NULL;
-
-    const char *relative = "/.config/sortify/imgui.ini";
-    size_t len = strlen(home) + strlen(relative) + 1;
-
-    char *full_path = (char *)malloc(len);
-    if (full_path)
-    {
-        snprintf(full_path, len, "%s%s", home, relative);
-    }
-
-    return full_path;
-}
-
-void ensure_config_dir_exists()
-{
-    const char *home = getenv("HOME");
-    if (!home)
-        return;
-
-    const char *config_dir = "/.config/sortify";
-    size_t len = strlen(home) + strlen(config_dir) + 1;
-
-    char *full_path = (char *)malloc(len);
-    if (full_path)
-    {
-        snprintf(full_path, len, "%s%s", home, config_dir);
-        mkdir(full_path, 0755); // Only creates if it doesn't exist
-    }
-}
-
-bool imgui_ini_exists(const char *filename)
-{
-    FILE *file = fopen(filename, "r");
-    if (file)
-    {
-        fclose(file);
-        return true;
-    }
-    return false;
-}
 
 int main()
 {
+    SRT_Config srt_config = {0};
+    srt_config_setup(&srt_config);
+
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_MAXIMIZED);
     InitWindow(GetScreenWidth(), GetScreenHeight(), "Sortify");
     SetTargetFPS(144);
@@ -71,9 +29,9 @@ int main()
     ioptr->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
 
-    int render_w = GetRenderWidth();
-    int render_h = GetRenderHeight();
-    ioptr->DisplayFramebufferScale = (ImVec2){(float)render_w / screen_w, (float)render_h / screen_h};
+    float render_w = (float)GetRenderWidth();
+    float render_h = (float)GetRenderHeight();
+    ioptr->DisplayFramebufferScale = (ImVec2){render_w / screen_w, render_h / screen_h};
 
     igStyleColorsDark(NULL);
     ImGui_ImplRaylib_Init();
@@ -86,14 +44,8 @@ int main()
     style->WindowBorderSize = 0.0f;
 
     bool first_launch = true;
-    // store imgui.ini at $HOME/.config/sortify/imgui.ini
-    ensure_config_dir_exists();
-    char *ini_path = get_config_path();
-    if (ini_path)
-    {
-        ioptr->IniFilename = ini_path;
-        first_launch = !imgui_ini_exists(ini_path);
-    }
+    ioptr->IniFilename = srt_config.ini_path;
+    first_launch = !srt_file_exists(srt_config.ini_path);
 
     bool done = false;
     while (!done)
@@ -136,8 +88,8 @@ int main()
                 ImGuiID left_id, right_id;
                 igDockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.2f, &right_id, &left_id);
 
-                igDockBuilderDockWindow("Main View", left_id);
-                igDockBuilderDockWindow("Side Panel", right_id);
+                igDockBuilderDockWindow("Visualizer", left_id);
+                igDockBuilderDockWindow("Configuration", right_id);
 
                 igDockBuilderFinish(dockspace_id);
                 dock_initialized = true;
@@ -145,7 +97,7 @@ int main()
         }
         igEnd();
 
-        igBegin("Main View", NULL, ImGuiWindowFlags_None);
+        igBegin("Visualizer", NULL, ImGuiWindowFlags_None);
         {
             igText("This is the main content area.");
             static float f = 0.0f;
@@ -158,10 +110,10 @@ int main()
         }
         igEnd();
 
-        igBegin("Side Panel", NULL, ImGuiWindowFlags_None);
+        igBegin("Configuration", NULL, ImGuiWindowFlags_None);
         {
             igText("This is the side panel (20%% width).");
-            igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ioptr->Framerate, ioptr->Framerate);
+            // igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ioptr->Framerate, ioptr->Framerate);
         }
         igEnd();
 
@@ -177,6 +129,6 @@ int main()
     ImGui_ImplRaylib_Shutdown();
     igDestroyContext(NULL);
     CloseWindow();
-    free(ini_path);
+    srt_config_teardown(&srt_config);
     return 0;
 }
